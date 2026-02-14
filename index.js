@@ -5,68 +5,95 @@ const twilio = require('twilio');
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// AYARLAR
 const MY_NUMBER = 'whatsapp:+905449559033'; 
 const TWILIO_NUMBER = 'whatsapp:+14155238886';
-
-const iltifatlar = [
-    "Gülüm, yazılan en kusursuz Java class'ından bile daha güzelsin.",
-    "Dünyadaki bütün sunucular çökse bile sana olan aşkım 7/24 up and running.",
-    "İskenderun Teknik'teki hiçbir zorlu sınav, senin gözlerine bakmak kadar büyüleyici olamaz.",
-    "Senin gülüşün, hayatımdaki en güzel 'Compiled Successfully' mesajı."
-];
-
-const randevuFikirleri = [
-    "Peugeot Rifter GT ile rotasız, sadece ikimizin olduğu uzun bir sahil yolculuğu. 🚙💨",
-    "Telefonları tamamen kapatıp, sadece birbirimize odaklandığımız kahve ve tatlı krizli bir akşam. ☕🍰",
-    "Kuzenimle planladığımız o efsane kart oyunu gecesi! 🃏",
-    "Beraber mutfağa girip en sevdiğin yemeği yapma denemesi. 🍝"
-];
 
 app.post('/whatsapp', async (req, res) => {
     const twiml = new twilio.twiml.MessagingResponse();
     const gelenMesaj = req.body.Body ? req.body.Body.trim() : '';
     const gonderenNo = req.body.From;
-
-    // Twilio Client kurulumu (Bildirim göndermek için)
     const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-    // EĞER MESAJ SENDEN GELMİYORSA (YANİ GÜLÜM YAZIYORSA) SANA HABER VER
+    // Bildirim Sistemi (Senin telefonuna rapor gelir)
     if (gonderenNo !== MY_NUMBER) {
         try {
             await client.messages.create({
-                from: TWILIO_NUMBER,
-                to: MY_NUMBER,
-                body: `🔔 ibothem2.0 Raporu: Gülüm bota şunu yazdı: "${gelenMesaj}"`
+                from: TWILIO_NUMBER, to: MY_NUMBER,
+                body: `🔔 rapor: gulum yazdi: "${gelenMesaj}"`
             });
-        } catch (err) {
-            console.error("Bildirim gönderilemedi:", err);
-        }
+        } catch (err) { console.error(err); }
     }
 
     let cevap = "";
-    const mesajAlt = gelenMesaj.toLowerCase();
+    const m = gelenMesaj.toLowerCase()
+        .replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u')
+        .replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ç/g, 'c');
 
-    if (mesajAlt === 'merhaba' || mesajAlt === 'selam' || mesajAlt === 'menü') {
-        cevap = `🌹 Hoş geldin Gülüm...\n\nBen ibothem2.0! Sevgilinin senin için kodladığı Sanal Asistanın.\n\nSana nasıl yardımcı olabilirim? Lütfen bir numara seç:\n\n1️⃣ Modum Düşük\n2️⃣ Bana İltifat Et\n3️⃣ Ne Yapsak?\n4️⃣ Büyük Sır\n5️⃣ Geliştiriciye Not Bırak`;
-    } 
-    else if (gelenMesaj === '1') {
-        cevap = `✨ Hemen modunu yükseltiyorum! Şunu asla unutma: Sen bu dünyadaki en özel insansın ve ben OOP finaline çalışırken bile sadece seni düşünüyordum. 🥰`;
-    } 
-    else if (gelenMesaj === '2') {
-        cevap = `💻 Sistem Mesajı: ${iltifatlar[Math.floor(Math.random() * iltifatlar.length)]}`;
-    } 
-    else if (gelenMesaj === '3') {
-        cevap = `🎯 ibothem2.0 Randevu Modülü: ${randevuFikirleri[Math.floor(Math.random() * randevuFikirleri.length)]}`;
-    } 
-    else if (gelenMesaj === '4') {
-        cevap = `🚨 GİZLİ VERİ: Peugeot Rifter GT'nin sağ koltuğu sonsuza kadar sadece sana rezerve edildi. Seni çok seviyorum Gülüm. 💖`;
-    } 
-    else if (gelenMesaj === '5') {
-        cevap = `💌 Sistem: Sevgiline notun iletildi (aslında her yazdığını görüyor şu an 😉).`;
-    } 
+    // --- GELISMIS FONKSIYONLAR ---
+
+    // 1. Ask Olcer (Random % veriyor)
+    if (m.includes('ask olcer') || m.includes('seviye')) {
+        const yuzde = Math.floor(Math.random() * 11) + 90; // %90-100 arasi cikar hep :)
+        cevap = `❤️ ask olcer sonucu: %${yuzde}\n\nsistem notu: bu deger ethemin kalbindeki gercek sevginin sadece binde biri gulum.`;
+    }
+
+    // 2. Fal Bakma (Eglencesine)
+    else if (m.includes('fal bak') || m.includes('falci')) {
+        const fallar = [
+            "fincaninda bir rifter goruyorum, cok yakinda guzel bi yola cikacaksiniz.",
+            "kalbin cok temiz gulum, ethem adinda bi genc senin icin koca gece kod yazmis.",
+            "uc vakte kadar bi mesaj alacaksin, icinde 'seni cok seviyorum' yazacak."
+        ];
+        cevap = `🔮 ibothem2.0 falci modu: ${fallar[Math.floor(Math.random() * fallar.length)]}`;
+    }
+
+    // 3. Oyun (Tas Kagit Makas)
+    else if (m === 'tas' || m === 'kagit' || m === 'makas') {
+        const secenek = ['tas', 'kagit', 'makas'];
+        const botSecim = secenek[Math.floor(Math.random() * 3)];
+        cevap = `ben ${botSecim} sectim! \n\n${botSecim === m ? 'berabere, bi daha dene gulum.' : 'nese kimin kazandigi onemli degil her turlu kalbimi sen kazandin zaten.'}`;
+    }
+
+    // 4. Hava Durumu / Yemek / Mod (Akilli Tahminler)
+    else if (m.includes('hava')) {
+        cevap = "valla disarda hava nasil bilmem ama benim kalbimde firtinalar kopuyo gulum. (iskenderun da hava her turlu sicaktir zaten bosver)";
+    }
+    else if (m.includes('aciktim') || m.includes('yemek')) {
+        cevap = "hemen etheme (yani bana) yaz, rifterla seni en sevdigin yere gotursun. emir bekliyorum.";
+    }
+
+    // 5. Klasik Kelime Yakalayıcılar (Gelistirilmis)
+    else if (m === 'sa' || m === 'sea' || m === 'slm') {
+        cevap = "as gulum, sevgililer gunun kutlu olsun tekrar. bugun kraliçe sensin.";
+    }
+    else if (m.includes('napiyosun') || m.includes('napion') || m.includes('napuon')) {
+        cevap = "seni dusunuyorum, bi de bu botun kodlariyla ugrasiyorum gulum her sey senin gulusun icin.";
+    }
+    else if (m.includes('seviyorum') || m.includes('asigim')) {
+        cevap = "bende seni seviyorum gulum, seninle gecen her saniye benim icin bir 'success' mesajidir.";
+    }
+    else if (m.length > 5 && (m.includes('asdf') || m.includes('haha') || m.includes('sjsj'))) {
+        cevap = "o gulusune kurban be gulum, sen hep boyle mutlu ol diye ugrasiyorum zaten.";
+    }
+
+    // 6. Ana Menu ve Yardim
+    else if (m === 'merhaba' || m === 'selam' || m === 'menu' || m === 'yardim') {
+        cevap = `🌹 hosgeldin gulum, ben senin icin kodlanmis ibothem2.0.\n\nneler yapabilirim bak:\n\n1️⃣ modum dusuk (beni guldur)\n2️⃣ bana guzel bisey soyle\n3️⃣ ne yapalim?\n4️⃣ buyuk sir\n5️⃣ bana not birak\n\nveya su komutlari dene: 'fal bak', 'ask olcer', 'tas-kagit-makas' oyna.`;
+    }
+
+    // 7. Numara Menuleri
+    else if (m === '1') cevap = "git aynaya bak, dunyanin en sansli adamiyla sevgili olan o guzelligi gor. gulumse gulum!";
+    else if (m === '2') {
+        const sozler = ["yazdigim en kusursuz kod bile senin gulusun kadar temiz degil.", "iskenderun teknikten mezun olurum ama senden asla vazgecmem.", "rifterin sag koltugu senin icin dunyanin en guvenli yeri."];
+        cevap = sozler[Math.floor(Math.random() * sozler.length)];
+    }
+    else if (m === '3') cevap = "rifterla sahile mi sursek, yoksa kuzenlerle kart mi oynasak? sen sec gulum.";
+    else if (m === '4') cevap = "buyuk sir: oop calisirken bile kagitlara adini yaziyorum, hoca gorse diplomayi yakar.";
+    else if (m === '5') cevap = "notunu aldim, direkt etheme (yani bana) ilettim. o da su an telefon basinda seni bekliyo.";
+
+    // 8. Error Handling (Kibarca sacmaliyor)
     else {
-        cevap = `🤖 Gülüm, sadece 'Menü' ya da rakamları (1-5) anlıyorum.`;
+        cevap = "gulum tam anlayamadim, ibothem2.0 biraz acemi daha. sadece rakamlari veya basit seyleri yazarsan anlarim hemen.";
     }
 
     twiml.message(cevap);
@@ -75,6 +102,4 @@ app.post('/whatsapp', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 ibothem2.0 Yayında!`);
-});
+app.listen(PORT, () => { console.log(`🚀 ibothem2.0 ultimate yayinda!`); });
