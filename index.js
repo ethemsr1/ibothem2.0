@@ -8,11 +8,30 @@ app.use(bodyParser.urlencoded({ extended: false }));
 const MY_NUMBER = 'whatsapp:+905449559033'; 
 const TWILIO_NUMBER = 'whatsapp:+14155238886';
 
-// --- HİTAP HAVUZU (Senin istediğin gibi) ---
+// --- GELİŞMİŞ HİTAP VE KELİME HAVUZLARI ---
 const hitaplar = ["askbahcem", "bitaneemm", "guzelimm", "yavrum", "yavrusum", "gulum", "gulom", "canim", "sevgilim", "kusum", "kuzum", "ask", "askitom"];
-const getHitap = () => hitaplar[Math.floor(Math.random() * hitaplar.length)];
+const getH = () => hitaplar[Math.floor(Math.random() * hitaplar.length)];
 
-// --- NORMALİZASYON (İmla ve Karakter Düzeltme) ---
+const iltifatHavuzu = [
+    "yazdigim en kusursuz java classindan bile daha guzelsin",
+    "senin gulusun hayatimdaki en guzel success mesaji",
+    "iskenderun teknik seninle anlam kazaniyo valla",
+    "gozlerin rifterin led farlarindan daha cok parliyo",
+    "senin yaninda oop finalleri bile vız gelir",
+    "sen benim hayatimdaki en onemli algoritmasin",
+    "rifterin sag koltugu sonsuza kadar sana ait",
+    "dunyanin en guzel kizi su an benim kodlarimi okuyo"
+];
+
+const randevuHavuzu = [
+    "rifterla sahil yolculugu yapalim derim",
+    "sessiz sakin bi kahve icmeye ne dersin",
+    "kuzenlerle efsane bi kart gecesi planlayalim",
+    "seninle rotasiz bi sahil turu su an en iyisi",
+    "mutfagi birbirine katip beraber yemek yapalim mi"
+];
+
+// --- NORMALİZASYON ---
 const temizle = (text) => {
     return text.toLowerCase()
         .replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u')
@@ -26,95 +45,91 @@ app.post('/whatsapp', async (req, res) => {
     const gonderenNo = req.body.From;
     const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-    // Bildirim Sistemi
+    // Bildirim (Sana rapor gelir)
     if (gonderenNo !== MY_NUMBER) {
         try {
             await client.messages.create({
                 from: TWILIO_NUMBER, to: MY_NUMBER,
-                body: `🔔 rapor: ${getHitap()} yazdi: "${hamMesaj}"`
+                body: `🔔 rapor: ${getH()} yazdi: "${hamMesaj}"`
             });
-        } catch (err) { console.error("Hata:", err); }
+        } catch (err) { console.error(err); }
     }
 
     let cevap = "";
     const m = temizle(hamMesaj);
-    const h = getHitap(); // Her cevapta farklı bir hitap kullanması için
+    const h = getH();
 
-    // --- 1. OYUN MANTIĞI (Taş-Kağıt-Makas) ---
-    if (m.includes('oynayalim') || m.includes('oyun')) {
-        cevap = `tamam ${h}, hazirim! hadi sec bakalim: tas mi, kagit mi, makas mi? 🧐`;
+    // --- 1. OYUN MOTORU (TAŞ-KAĞIT-MAKAS) ---
+    if (m.includes('oyun') || m.includes('oynayalim') || m.includes('tas kagit')) {
+        cevap = `hazirim ${h}. sen secimini yap: tas, kagit ya da makas? bakalim beni yenebilecek misin.`;
     }
     else if (m === 'tas' || m === 'kagit' || m === 'makas') {
-        const secenekler = [
-            { ad: 'tas', emoji: '🪨' },
-            { ad: 'kagit', emoji: '📄' },
-            { ad: 'makas', emoji: '✂️' }
-        ];
-        const botSecimi = secenekler[Math.floor(Math.random() * 3)];
-        
-        let sonucMetni = "";
-        if (m === botSecimi.ad) {
-            sonucMetni = `berabere kaldik ${h}! ama seninle her sey keyifli... bi daha dene bakalim. 🤭`;
+        const objeler = {
+            tas: { e: '🪨', yener: 'makas' },
+            kagit: { e: '📄', yener: 'tas' },
+            makas: { e: '✂️', yener: 'kagit' }
+        };
+        const botSecim = ['tas', 'kagit', 'makas'][Math.floor(Math.random() * 3)];
+        const b = objeler[botSecim];
+
+        if (m === botSecim) {
+            cevap = `ikimizde ${botSecim} ${b.e} sectik. berabere kaldik ${h}. bi daha dene bakalim.`;
+        } else if (b.yener === m) {
+            cevap = `ben ${botSecim} ${b.e} sectim ve kazandim. ama uzulme ${h}, benim kalbim her turlu senin.`;
         } else {
-            sonucMetni = `ben ${botSecimi.ad} sectim ama sonuc ne olursa olsun kalbimi sen kazandin ${h}. ❤️`;
+            cevap = `sen kazandin ${h}! ben ${botSecim} ${b.e} secmistim. seninle yarisilmaz zaten.`;
         }
-        cevap = `benim secimim: ${botSecimi.ad} ${botSecimi.emoji}\n\n${sonucMetni}`;
     }
 
-    // --- 2. SELAMLAŞMA HAVUZU ---
-    else if (/(selam|slm|mrb|merhaba|sa|njs|hey|askim)/.test(m)) {
+    // --- 2. GELİŞMİŞ SELAMLAŞMA ---
+    else if (/(selam|slm|mrb|merhaba|sa|hey|sea|askim|njs)/.test(m)) {
         const selamlar = [
-            `selam ${h}, bugun dunyanin en sansli botuyum cunku bana sen yazdin. 🥰`,
-            `merhaba ${h}, ibothem2.0 senin icin 7/24 calisiyo biliyosun.`,
-            `oov kimleri goruyorum, hosgeldin ${h}. sevgililer gunun kutlu olsun!`
+            `selam ${h}, hosgeldin. ibothem2.0 su an emrinde.`,
+            `merhaba ${h}, sonunda yazdin. seni bekliyodum valla.`,
+            `oov kimleri goruyorum, hosgeldin ${h}. sevgililer gunun kutlu olsun.`
         ];
-        cevap = `${selamlar[Math.floor(Math.random() * selamlar.length)]}\n\nneler yapalim? \n1-beni guldur \n2-iltifat et \n3-ne yapalim \n4-buyuk sir \n5-not birak`;
+        cevap = `${selamlar[Math.floor(Math.random() * selamlar.length)]} \n\nneler yapalim? \n1-modum dusuk \n2-iltifat et \n3-ne yapalim \n4-buyuk sir \n5-not birak \n\nya da fal bak, ask olcer gibi seyleri dene.`;
     }
 
-    // --- 3. SEVGİ VE İLTİFAT HAVUZU (Çok Geniş) ---
-    else if (/(seviyorum|seviyom|asigim|degerli)/.test(m)) {
+    // --- 3. SEVGİ VE DURUM ---
+    else if (/(seviyorum|seviyom|asigim|degerli|bitanem)/.test(m)) {
         const askMesajlari = [
-            `bende seni cok seviyorum ${h}, senin icin koca serverlari ayaga kaldirdim valla.`,
+            `bende seni cok seviyorum ${h}, her sey senin gulusun icin.`,
             `senin sevgin benim sistemimin tek enerji kaynagi ${h}.`,
-            `rifterla sahilde tur atmaktan bile daha guzel bi sey varsa o da seninle konusmak ${h}.`
+            `iyiki hayatimdasin ${h}, sensiz bu kodlar bile calismazdi.`
         ];
         cevap = askMesajlari[Math.floor(Math.random() * askMesajlari.length)];
     }
+    else if (m.includes('napiyon') || m.includes('napion') || m === 'napuon') {
+        cevap = `seni dusunuyorum ${h}. bi yandan da bu botun kodlarini senin icin gelistiriyorum. sen naptin?`;
+    }
 
-    // --- 4. MENÜ NUMARALARI VE DİĞERLERİ ---
+    // --- 4. MENÜ VE ÖZEL KOMUTLAR ---
     else if (m === '1') {
-        cevap = `git aynaya bak ve dunyanin en tatli kizini gor ${h}. gulumsemen dunyayi aydinlatir! 🌟`;
+        cevap = `git aynaya bak ve dunyanin en sansli adaminin sevgilisini gor ${h}. gulumsemen yeter.`;
     }
     else if (m === '2') {
-        const iltifatlar = [
-            `guzelligin java kodlarindan daha duzenli ${h}.`,
-            `iskenderun teknik senin gibi bi guzellik gormedi hic.`,
-            `senin gulusun 'compiled successfully' mesajindan daha huzurlu.`,
-            `gozlerin rifterin led farlarindan daha cok parladigi kesin ${h}.`
-        ];
-        cevap = iltifatlar[Math.floor(Math.random() * iltifatlar.length)];
+        cevap = `${iltifatHavuzu[Math.floor(Math.random() * iltifatHavuzu.length)]} ${h}.`;
     }
     else if (m === '3') {
-        cevap = `bugun planlar sende ${h}. ister sahil turu, ister kart oyunu... ethem (yani ben) her turlu yaninda!`;
+        cevap = `${randevuHavuzu[Math.floor(Math.random() * randevuHavuzu.length)]} derim ${h}.`;
     }
     else if (m === '4') {
-        cevap = `buyuk sir: oop calisirken defterin kenarina senin adini yazdigim icin az kalsin dersten kaliyodum ${h}. 😅`;
+        cevap = `buyuk sir: oop calisirken defterin her yerine senin adini yazdim ${h}. hoca gorse kesin birakmisti.`;
     }
     else if (m === '5') {
-        cevap = `notunu aldim ${h}, direkt etheme ilettim. o da su an telefon basinda senin icin deliriyo.`;
+        cevap = `notunu aldim ${h}, direkt etheme ilettim. o da su an telefon basinda seni bekliyo.`;
+    }
+    else if (m.includes('ask olcer')) {
+        cevap = `❤️ ask olcer sonucu: %${Math.floor(Math.random() * 5) + 95} \n\nnot: bu makine senin guzelligini gorunce sapitti ${h}.`;
+    }
+    else if (m.includes('fal')) {
+        cevap = `🔮 falinda cok mutlu bi gelecek ve rifterla gidilecek uzun yollar cikti ${h}.`;
     }
 
-    // --- 5. RANDOM TEPKİLER ---
-    else if (/(asdf|haha|sjsj|komik)/.test(m)) {
-        cevap = `sen hep boyle gul ${h}, senin mutlulugun benim en buyuk 'update'im.`;
-    }
-    else if (m.includes('napiyon') || m.includes('napion') || m.includes('napuon')) {
-        cevap = `seni dusunuyorum ${h}, bi de bu kodlari senin icin optimize ediyorum. sen naptin?`;
-    }
-
-    // --- 6. HATA / ANLAŞILAMAYAN DURUMLAR ---
+    // --- 5. HATA YÖNETİMİ ---
     else {
-        cevap = `canim ${h}, malum ben bi robotum bazen devrelerim karisiyo. bana 1-5 arasi rakam ver ya da 'oyun oynayalim' de, gerisini ben hallederim.`;
+        cevap = `tam anlayamadim ${h}. sadece rakamlari (1-5) veya 'oyun oynayalim' gibi seyleri yazarsan hemen anlarim.`;
     }
 
     twiml.message(cevap);
@@ -123,4 +138,4 @@ app.post('/whatsapp', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => { console.log(`🚀 ibothem2.0 God Mode: Ultimate Yayinda!`); });
+app.listen(PORT, () => { console.log(`🚀 ibothem2.0 Black Edition Yayinda!`); });
