@@ -122,7 +122,7 @@ app.post('/whatsapp', async (req, res) => {
 
     // --- 4. AKILLI CEVAP MOTORU VE MENÜ ---
     else if (/(selam|slm|mrb|merhaba|sa|njs|hey|askim)/.test(m)) {
-        cevap = `${getR(selamlar)} ${h}. ask ben ibothem2.0 olarak emrindeyim. \n\n1️⃣ - Bana iltifat et\n2️⃣ - Ne Yapsak?\n\nya da 'ask olcer', 'fal bak', 'yazi tura' veya 'sayi tahmin' komutlarini dene. bana not iletmek istersen 'hayatimin anlami' diye basla.`;
+        cevap = `${getR(selamlar)} ${h}.Ben ibothem2.0 olarak emrindeyim. \n\n1️⃣ - Bana iltifat et\n2️⃣ - Ne Yapsak?\n\nya da 'ask olcer', 'fal bak', 'yazi tura' veya 'sayi tahmin' komutlarini dene. bana not iletmek istersen 'hayatimin anlami' diye basla.`;
     }
     else if (m === '1') {
         cevap = `${getR(iltifatlar)} ${h}.`;
